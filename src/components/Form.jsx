@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const Form = (props) => {
   const [formData, setFormData] = useState({});
+  const [loading, setLoading] = useState(false);
 
   const onChangeHandler = (e) => {
     const { name, value } = e.target;
@@ -15,16 +16,28 @@ const Form = (props) => {
 
   const navigateTo = useNavigate();
 
-  const sendEmail = (e) => {
+  const sendEmail = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    emailjs.sendForm("service_cearnih", "template_lnnwoo6", form.current, {
-      publicKey: "zBqgPnkUy7aOWnRNF",
-    });
+    try {
+      await emailjs.sendForm(
+        "service_cearnih",
+        "template_lnnwoo6",
+        form.current,
+        {
+          publicKey: "zBqgPnkUy7aOWnRNF",
+        }
+      );
+      e.target.reset();
+      navigateTo("/checkout");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
 
     // console.log("Form submitted");
-    e.target.reset();
-    navigateTo("/checkout");
   };
 
   return (
@@ -167,17 +180,17 @@ const Form = (props) => {
 
         <div className='my-8 mx-auto justify-center items-center flex  w-full fixed bottom-0 sm:my-4 md:block'>
           <button
+            disabled={loading}
             type='submit'
-            className='w-[350px] md:w-[650px] text-center font-bold bg-blue-400 py-2 rounded-sm mx-auto'
+            className='w-[350px] md:w-[650px] text-center font-bold bg-blue-400 py-2 rounded-sm mx-auto disabled:opacity-10'
           >
-            Submit
+            {loading ? "Loading..." : "Submit"}
           </button>
         </div>
       </form>
     </div>
   );
 };
-
 
 Form.propTypes = {
   value: PropTypes.array.isRequired,
